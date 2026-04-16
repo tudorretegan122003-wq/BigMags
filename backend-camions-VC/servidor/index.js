@@ -25,8 +25,7 @@ db.connect(err => {
 });
 
 
-// ================= USERS =================
-
+//USERS 
 // GET todos
 app.get("/users", (req, res) => {
     db.query("SELECT * FROM users", (err, results) => {
@@ -87,8 +86,7 @@ app.delete("/users/:id", (req, res) => {
 });
 
 
-// ================= TRUCKS =================
-
+//TRUCKS
 // GET
 app.get("/trucks", (req, res) => {
     db.query("SELECT * FROM trucks", (err, results) => {
@@ -111,7 +109,7 @@ app.post("/trucks", (req, res) => {
     );
 });
 
-// ================= Routes =================
+//Routes
 // GET routes
 app.get("/routes", (req, res) => {
     db.query("SELECT * FROM routes", (err, results) => {
@@ -144,7 +142,7 @@ app.delete("/routes/:id", (req, res) => {
     });
 });
 
-// ================= Fuel =================
+//Fuel
 // GET fuel
 app.get("/fuel", (req, res) => {
     db.query("SELECT * FROM fuel_invoices", (err, results) => {
@@ -176,7 +174,7 @@ app.delete("/fuel/:id", (req, res) => {
         res.json({ message: "Eliminat" });
     });
 });
-// ================= Mantenimento =================
+//Mantenimento
 // GET maintenance
 app.get("/maintenance", (req, res) => {
     db.query("SELECT * FROM maintenance_invoices", (err, results) => {
@@ -206,7 +204,7 @@ app.delete("/maintenance/:id", (req, res) => {
         res.json({ message: "Eliminat" });
     });
 });
-// ================= Calendario =================
+//Calendario
 // GET calendar
 app.get("/calendar", (req, res) => {
     db.query("SELECT * FROM calendar_events", (err, results) => {
@@ -238,7 +236,7 @@ app.delete("/calendar/:id", (req, res) => {
         res.json({ message: "Eliminat" });
     });
 });
-// ================= ROOT =================
+//ROOT
 app.get("/", (req, res) => {
     res.send("API simple camions 🚛");
 });
