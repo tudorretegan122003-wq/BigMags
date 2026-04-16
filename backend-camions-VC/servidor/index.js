@@ -238,7 +238,7 @@ app.delete("/calendar/:id", (req, res) => {
 });
 //ROOT
 app.get("/", (req, res) => {
-    res.send("API simple camions 🚛");
+    res.send("Benvinguts a BitMags");
 });
 
 app.listen(PORT, () => {
