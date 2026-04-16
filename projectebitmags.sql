@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 16-04-2026 a las 15:48:33
+-- Tiempo de generación: 16-04-2026 a las 16:35:55
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -20,22 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `projectebitmags`
 --
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `calendar_events`
---
-
-CREATE TABLE `calendar_events` (
-  `id` int(11) NOT NULL,
-  `truck_id` int(11) NOT NULL,
-  `event_type` enum('carga','descarga') NOT NULL,
-  `date` date NOT NULL,
-  `time` time NOT NULL,
-  `location` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish2_ci;
 
 -- --------------------------------------------------------
 
@@ -120,13 +104,6 @@ CREATE TABLE `users` (
 --
 
 --
--- Indices de la tabla `calendar_events`
---
-ALTER TABLE `calendar_events`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `truck_id` (`truck_id`);
-
---
 -- Indices de la tabla `fuel_invoices`
 --
 ALTER TABLE `fuel_invoices`
@@ -167,12 +144,6 @@ ALTER TABLE `users`
 --
 
 --
--- AUTO_INCREMENT de la tabla `calendar_events`
---
-ALTER TABLE `calendar_events`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT de la tabla `fuel_invoices`
 --
 ALTER TABLE `fuel_invoices`
@@ -205,12 +176,6 @@ ALTER TABLE `users`
 --
 -- Restricciones para tablas volcadas
 --
-
---
--- Filtros para la tabla `calendar_events`
---
-ALTER TABLE `calendar_events`
-  ADD CONSTRAINT `calendar_events_ibfk_1` FOREIGN KEY (`truck_id`) REFERENCES `trucks` (`id`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `fuel_invoices`
