@@ -95,6 +95,23 @@ app.get("/trucks", (req, res) => {
     });
 });
 
+
+app.get("/trucks/:id", (req, res) => {
+    const id = parseInt(req.params.id)
+    db.get(`SELECT * FROM trucks WHERE id = ${id}`, [], (err, row) => {
+        if (err) {
+            return res.status(500).json({error: "Error en la BD",descripcio:error});
+        }
+        if (row) {
+            console.log(row)
+            return res.json(row);
+        }
+        else {
+            return res.status(404).json({error: "Camión no encontrado"});
+        }
+    });
+})
+
 // POST
 app.post("/trucks", (req, res) => {
     const { license_plate, model, driver_name } = req.body;
