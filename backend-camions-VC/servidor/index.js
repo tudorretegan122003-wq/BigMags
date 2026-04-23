@@ -95,27 +95,6 @@ app.get("/trucks", (req, res) => {
     });
 });
 
-
-app.get("/trucks/:id", (req, res) => {
-    const id = parseInt(req.params.id);
-
-    if (isNaN(id)) {
-        return res.status(400).json({ error: "El ID proporcionado no es un número válido" });
-    }
-
-    db.query("SELECT * FROM trucks WHERE id = ?", [id], (err, results) => {
-        if (err) {
-            return res.status(500).json({ error: "Error en la BD", descripcio: err });
-        }
-        if (results.length > 0) {
-            return res.json(results[0]);
-        }
-        else {
-            return res.status(404).json({error: "Camión no encontrado"});
-        }
-    });
-})
-
 // POST
 app.post("/trucks", (req, res) => {
     const { license_plate, model, driver_name } = req.body;
@@ -126,6 +105,27 @@ app.post("/trucks", (req, res) => {
         (err, result) => {
             if (err) return res.status(500).json(err);
             res.json({ id: result.insertId });
+        }
+    );
+});
+
+// DELETE
+app.delete("/trucks/:id", (req, res) => {
+    db.query("DELETE FROM trucks WHERE idCamion=?", [req.params.id], (err) => {
+        if (err) return res.status(500).json(err);
+        res.json({ message: "Camió eliminat" });
+    });
+});
+
+//PUT
+app.put("/trucks/:id", (req, res) => {
+    const { license_plate, model, driver_name } = req.body;
+    db.query(
+        "UPDATE trucks SET license_plate=?, model=?, driver_name=? WHERE idCamion=?",
+        [license_plate, model, driver_name, req.params.id],
+        (err, result) => {
+            if (err) return res.status(500).json(err);
+            res.json({ message: "Camió actualitzat" });
         }
     );
 });
@@ -163,6 +163,20 @@ app.delete("/routes/:id", (req, res) => {
     });
 });
 
+//PUT routes
+app.put("/routes/:id", (req, res) => {
+    const { truck_id, start_location, end_location, distance_km, fuel_consumed_liters, date } = req.body;
+
+    db.query(
+        `UPDATE routes SET truck_id=?, start_location=?, end_location=?, distance_km=?, fuel_consumed_liters=?, date=? WHERE id=?`,
+        [truck_id, start_location, end_location, distance_km, fuel_consumed_liters, date, req.params.id],
+        (err, result) => {
+            if (err) return res.status(500).json(err);
+            res.json({ message: "Ruta actualitzada" });
+        }
+    );
+});
+
 //Fuel
 // GET fuel
 app.get("/fuel", (req, res) => {
@@ -195,6 +209,7 @@ app.delete("/fuel/:id", (req, res) => {
         res.json({ message: "Eliminat" });
     });
 });
+
 //Mantenimento
 // GET maintenance
 app.get("/maintenance", (req, res) => {
@@ -221,38 +236,6 @@ app.post("/maintenance", (req, res) => {
 // DELETE maintenance
 app.delete("/maintenance/:id", (req, res) => {
     db.query("DELETE FROM maintenance_invoices WHERE id=?", [req.params.id], (err) => {
-        if (err) return res.status(500).json(err);
-        res.json({ message: "Eliminat" });
-    });
-});
-//Calendario
-// GET calendar
-app.get("/calendar", (req, res) => {
-    db.query("SELECT * FROM calendar_events", (err, results) => {
-        if (err) return res.status(500).json(err);
-        res.json(results);
-    });
-});
-
-// POST calendar
-app.post("/calendar", (req, res) => {
-    const { truck_id, event_type, date, time, location } = req.body;
-
-    db.query(
-        `INSERT INTO calendar_events 
-        (truck_id, event_type, date, time, location)
-        VALUES (?, ?, ?, ?, ?)`,
-        [truck_id, event_type, date, time, location],
-        (err, result) => {
-            if (err) return res.status(500).json(err);
-            res.json({ id: result.insertId });
-        }
-    );
-});
-
-// DELETE calendar
-app.delete("/calendar/:id", (req, res) => {
-    db.query("DELETE FROM calendar_events WHERE id=?", [req.params.id], (err) => {
         if (err) return res.status(500).json(err);
         res.json({ message: "Eliminat" });
     });
