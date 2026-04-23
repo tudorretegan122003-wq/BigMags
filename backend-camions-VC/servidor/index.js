@@ -95,6 +95,27 @@ app.get("/trucks", (req, res) => {
     });
 });
 
+app.get("/trucks/:id", (req, res) => {
+    const id = parseInt(req.params.id);
+
+    if (isNaN(id)) {
+        return res.status(400).json({ error: "El ID proporcionado no es un número válido" });
+    }
+
+    db.query("SELECT * FROM trucks WHERE id = ?", [id], (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: "Error en la BD", descripcio: err });
+        }
+        if (results.length > 0) {
+            return res.json(results[0]);
+        }
+        else {
+            return res.status(404).json({error: "Camión no encontrado"});
+        }
+    });
+})
+
+
 // POST
 app.post("/trucks", (req, res) => {
     const { license_plate, model, driver_name } = req.body;
