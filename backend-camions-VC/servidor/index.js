@@ -124,12 +124,10 @@ app.delete("/users/:id", (req, res) => {
         return res.status(400).json({ error: "Id mal passat" });
     }
 
-    // Com a l'exemple, podria fer una lògica de llista, però fem la directa a BD
     db.query("DELETE FROM users WHERE idUsuari = ?", [idUsuari], (err, result) => {
         if (err) {
             return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
         }
-        // Comprovem si realment s'ha eliminat alguna fila
         if (result.affectedRows === 0) {
              return res.status(404).json({ error: "Id usuari no existeix" });
         }
