@@ -230,14 +230,14 @@ app.delete("/routes/:id", (req, res) => {
 
 //COMBUSTIBLE
 
-app.get("/fuel", (req, res) => {
+app.get("/invoices", (req, res) => {
     db.query("SELECT * FROM fuel_invoices", (err, rows) => {
         if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
         return res.json(rows);
     });
 });
 
-app.post("/fuel", (req, res) => {
+app.post("/invoices", (req, res) => {
     const { truck_id, date, fuel_type, liters, price_per_liter, total_price } = req.body;
     const sql = "INSERT INTO fuel_invoices (truck_id, date, fuel_type, liters, price_per_liter, total_price) VALUES (?, ?, ?, ?, ?, ?)";
     
@@ -247,7 +247,7 @@ app.post("/fuel", (req, res) => {
     });
 });
 
-app.delete("/fuel/:id", (req, res) => {
+app.delete("/invoices/:id", (req, res) => {
     const id = parseInt(req.params.id);
     db.query("DELETE FROM fuel_invoices WHERE id = ?", [id], (err, result) => {
         if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
