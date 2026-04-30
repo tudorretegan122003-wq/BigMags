@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 22-04-2026 a las 16:14:00
+-- Tiempo de generación: 30-04-2026 a las 15:09:09
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -20,6 +20,20 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `projectebitmags`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `date_time`
+--
+
+CREATE TABLE `date_time` (
+  `route_id` int(11) NOT NULL,
+  `truck_id` int(11) NOT NULL,
+  `start_time` time NOT NULL,
+  `end_time` time DEFAULT NULL,
+  `date` date DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -78,30 +92,27 @@ INSERT INTO `maintenance_invoices` (`id`, `truck_id`, `date`, `description`, `co
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `routes`
+-- Estructura de tabla para la tabla `route`
 --
 
-CREATE TABLE `routes` (
+CREATE TABLE `route` (
   `id` int(11) NOT NULL,
-  `truck_id` int(11) NOT NULL,
   `start_location` varchar(255) NOT NULL,
   `end_location` varchar(255) NOT NULL,
   `distance_km` decimal(10,2) NOT NULL,
-  `fuel_consumed_liters` decimal(10,2) DEFAULT NULL,
-  `date` date NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish2_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Volcado de datos para la tabla `routes`
+-- Volcado de datos para la tabla `route`
 --
 
-INSERT INTO `routes` (`id`, `truck_id`, `start_location`, `end_location`, `distance_km`, `fuel_consumed_liters`, `date`, `created_at`) VALUES
-(1, 1, 'Madrid, Centro', 'Barcelona, Zona Franca', 625.50, 95.40, '2026-04-23', '2026-04-22 14:11:22'),
-(2, 2, 'Valencia, Puerto', 'Sevilla, Polígono Industrial', 840.20, 128.70, '2026-04-24', '2026-04-22 14:11:22'),
-(3, 3, 'Bilbao, Indautxu', 'Zaragoza, Actur', 335.80, 52.10, '2026-04-25', '2026-04-22 14:11:22'),
-(4, 1, 'Madrid, Atocha', 'Valladolid, Centro', 180.40, 27.50, '2026-04-26', '2026-04-22 14:11:22'),
-(5, 4, 'Málaga, Estepona', 'Granada, Centro', 145.00, 22.30, '2026-04-26', '2026-04-22 14:11:22');
+INSERT INTO `route` (`id`, `start_location`, `end_location`, `distance_km`, `created_at`) VALUES
+(1, 'Madrid, Centro', 'Barcelona, Zona Franca', 625.50, '2026-04-23 13:52:01'),
+(2, 'Valencia, Puerto', 'Sevilla, Polígono Industrial', 840.20, '2026-04-23 13:52:01'),
+(3, 'Bilbao, Indautxu', 'Zaragoza, Actur', 335.80, '2026-04-23 13:52:01'),
+(4, 'Madrid, Atocha', 'Valladolid, Centro', 180.40, '2026-04-23 13:52:01'),
+(5, 'Málaga, Estepona', 'Granada, Centro', 145.00, '2026-04-23 13:52:01');
 
 -- --------------------------------------------------------
 
@@ -159,6 +170,13 @@ INSERT INTO `users` (`idUsuari`, `username`, `password`, `email`, `role`, `creat
 --
 
 --
+-- Indices de la tabla `date_time`
+--
+ALTER TABLE `date_time`
+  ADD PRIMARY KEY (`route_id`,`truck_id`),
+  ADD KEY `truck_id` (`truck_id`);
+
+--
 -- Indices de la tabla `fuel_invoices`
 --
 ALTER TABLE `fuel_invoices`
@@ -173,11 +191,11 @@ ALTER TABLE `maintenance_invoices`
   ADD KEY `truck_id` (`truck_id`);
 
 --
--- Indices de la tabla `routes`
+-- Indices de la tabla `route`
 --
-ALTER TABLE `routes`
+ALTER TABLE `route`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `truck_id` (`truck_id`);
+  ADD UNIQUE KEY `unique_route` (`start_location`,`end_location`,`distance_km`);
 
 --
 -- Indices de la tabla `trucks`
@@ -211,10 +229,10 @@ ALTER TABLE `maintenance_invoices`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT de la tabla `routes`
+-- AUTO_INCREMENT de la tabla `route`
 --
-ALTER TABLE `routes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+ALTER TABLE `route`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `trucks`
@@ -233,6 +251,13 @@ ALTER TABLE `users`
 --
 
 --
+-- Filtros para la tabla `date_time`
+--
+ALTER TABLE `date_time`
+  ADD CONSTRAINT `date_time_ibfk_1` FOREIGN KEY (`route_id`) REFERENCES `route` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `date_time_ibfk_2` FOREIGN KEY (`truck_id`) REFERENCES `trucks` (`id`) ON DELETE CASCADE;
+
+--
 -- Filtros para la tabla `fuel_invoices`
 --
 ALTER TABLE `fuel_invoices`
@@ -243,12 +268,6 @@ ALTER TABLE `fuel_invoices`
 --
 ALTER TABLE `maintenance_invoices`
   ADD CONSTRAINT `maintenance_invoices_ibfk_1` FOREIGN KEY (`truck_id`) REFERENCES `trucks` (`id`) ON DELETE CASCADE;
-
---
--- Filtros para la tabla `routes`
---
-ALTER TABLE `routes`
-  ADD CONSTRAINT `routes_ibfk_1` FOREIGN KEY (`truck_id`) REFERENCES `trucks` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
