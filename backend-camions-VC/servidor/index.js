@@ -10,7 +10,7 @@ const PORT = 3000;
 app.use(bodyParser.json());
 app.use(cors());
 
-// Connexió MySQL (Mantenint mysql2)
+// Connexió MySQL 
 const db = mysql.createConnection({
     host: "localhost",
     user: "root",
@@ -71,7 +71,6 @@ app.post("/users", (req, res) => {
         if (err) {
             return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
         } else {
-            // MySQL retorna insertId, similar a lastID de SQLite
             return res.json({ message: "Usuari creat", id: result.insertId });
         }
     });
@@ -286,7 +285,7 @@ app.delete("/maintenance/:id", (req, res) => {
 
 // ROOT
 app.get("/", (req, res) => {
-    res.send("Benvinguts a BitMags (Estil SQLite amb MySQL)");
+    res.send("Benvinguts a BitMags");
 });
 
 // Obrim el servidor
