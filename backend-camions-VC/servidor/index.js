@@ -64,8 +64,9 @@ app.post("/users", (req, res) => {
         return res.json({ error: "Falten dades (username o email)" });
     }
 
-    const sql = "INSERT INTO users (username, email) VALUES (?, ?, ?)";
-    const params = [dadesUsuari.username, dadesUsuari.email || "user"];
+    const sql = "INSERT INTO users (username, email) VALUES (?, ?)";
+    
+    const params = [dadesUsuari.username, dadesUsuari.email];
 
     db.query(sql, params, (err, result) => {
         if (err) {
