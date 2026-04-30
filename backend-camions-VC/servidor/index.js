@@ -1,14 +1,16 @@
-const express = require("express");
+const bodyParser = require('body-parser');
+const express = require('express');
 const cors = require("cors");
-const mysql = require("mysql2");
+const mysql = require('mysql2');
 
 const app = express();
 const PORT = 3000;
 
+// Configuració similar a l'exemple
+app.use(bodyParser.json());
 app.use(cors());
-app.use(express.json());
 
-// conexión MySQL
+// Connexió MySQL (Mantenint mysql2)
 const db = mysql.createConnection({
     host: "localhost",
     user: "root",
@@ -16,256 +18,274 @@ const db = mysql.createConnection({
     database: "projectebitmags"
 });
 
-db.connect(err => {
+db.connect((err) => {
     if (err) {
-        console.log("Error BD:", err);
+        console.error("Error en la connexió a la BD:", err.message);
     } else {
-        console.log("Conectado a MySQL");
+        console.log("Conectat a MySQL");
     }
 });
 
+//USUAIS
 
-//USERS 
-// GET todos
 app.get("/users", (req, res) => {
-    db.query("SELECT * FROM users", (err, results) => {
-        if (err) return res.status(500).json(err);
-        res.json(results);
+    db.query("SELECT * FROM users", (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+        }
+        return res.json(rows);
     });
 });
 
-// GET por id
 app.get("/users/:id", (req, res) => {
-    db.query("SELECT * FROM users WHERE idUsuari = ?", [req.params.id], (err, results) => {
-        if (err) return res.status(500).json(err);
-        if (results.length === 0)
-            return res.status(404).json({ error: "No trobat" });
+    const id = parseInt(req.params.id);
+    
+    if (isNaN(id)) {
+        return res.status(400).json({ error: "ID invàlid" });
+    }
 
-        res.json(results[0]);
+    db.query("SELECT * FROM users WHERE idUsuari = ?", [id], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+        }
+        if (rows && rows.length > 0) {
+            console.log(rows);
+            return res.json(rows);
+        } else {
+            return res.status(404).json({ error: "Usuari no trobat" });
+        }
     });
 });
 
-// POST
 app.post("/users", (req, res) => {
-    const { username, email, role } = req.body;
+    const dadesUsuari = req.body;
+    
+    if (!(dadesUsuari.username && dadesUsuari.email)) {
+        return res.json({ error: "Falten dades (username o email)" });
+    }
 
-    db.query(
-        "INSERT INTO users (username, email, role) VALUES (?, ?, ?)",
-        [username, email, role || "user"],
-        (err, result) => {
-            if (err) return res.status(500).json(err);
-            res.json({ id: result.insertId });
+    const sql = "INSERT INTO users (username, email, role) VALUES (?, ?, ?)";
+    const params = [dadesUsuari.username, dadesUsuari.email, dadesUsuari.role || "user"];
+
+    db.query(sql, params, (err, result) => {
+        if (err) {
+            return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+        } else {
+            // MySQL retorna insertId, similar a lastID de SQLite
+            return res.json({ message: "Usuari creat", id: result.insertId });
         }
-    );
+    });
 });
 
-// PUT
+function provaEnviarPost(username, email, role) {
+    fetch("http://localhost:3000/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: username, email: email, role: role })
+    }).then((resposta) => {
+        if (!resposta.ok) {
+            throw new Error("Error resposta servidor: " + resposta.statusText);
+        }
+        return resposta.text();
+    }).then(text => {
+        console.log("El servidor diu:", text);
+    })
+    .catch(error => {
+        console.log("----- ERROR:", error);
+    });
+}
+
 app.put("/users/:id", (req, res) => {
-    const { username, email, role } = req.body;
+    const idUsuari = parseInt(req.params.id);
+    const dades = req.body;
 
-    db.query(
-        "UPDATE users SET username=?, email=?, role=? WHERE idUsuari=?",
-        [username, email, role, req.params.id],
-        (err, result) => {
-            if (err) return res.status(500).json(err);
-            res.json({ message: "Actualitzat" });
+    db.query("SELECT * FROM users WHERE idUsuari = ?", [idUsuari], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
         }
-    );
+        if (!rows || rows.length === 0) {
+            return res.status(404).json({ error: "Usuari no trobat" });
+        }
+
+        const sql = "UPDATE users SET username = ?, email = ?, role = ? WHERE idUsuari = ?";
+        db.query(sql, [dades.username, dades.email, dades.role, idUsuari], (err, result) => {
+            if (err) {
+                return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+            } else {
+                return res.json({ message: "Usuari actualitzat" });
+            }
+        });
+    });
 });
 
-// DELETE
 app.delete("/users/:id", (req, res) => {
-    db.query(
-        "DELETE FROM users WHERE idUsuari=?",
-        [req.params.id],
-        (err) => {
-            if (err) return res.status(500).json(err);
-            res.json({ message: "Eliminat" });
+    const idUsuari = parseInt(req.params.id);
+    
+    if (isNaN(idUsuari)) {
+        return res.status(400).json({ error: "Id mal passat" });
+    }
+
+    // Com a l'exemple, podria fer una lògica de llista, però fem la directa a BD
+    db.query("DELETE FROM users WHERE idUsuari = ?", [idUsuari], (err, result) => {
+        if (err) {
+            return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
         }
-    );
+        // Comprovem si realment s'ha eliminat alguna fila
+        if (result.affectedRows === 0) {
+             return res.status(404).json({ error: "Id usuari no existeix" });
+        }
+        return res.json({ msg: "Tot correcte" });
+    });
 });
 
+//CAMIONS
 
-//TRUCKS
-// GET
 app.get("/trucks", (req, res) => {
-    db.query("SELECT * FROM trucks", (err, results) => {
-        if (err) return res.status(500).json(err);
-        res.json(results);
+    db.query("SELECT * FROM trucks", (err, rows) => {
+        if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+        return res.json(rows);
     });
 });
 
 app.get("/trucks/:id", (req, res) => {
     const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ error: "ID invàlid" });
 
-    if (isNaN(id)) {
-        return res.status(400).json({ error: "El ID proporcionado no es un número válido" });
-    }
-
-    db.query("SELECT * FROM trucks WHERE id = ?", [id], (err, results) => {
-        if (err) {
-            return res.status(500).json({ error: "Error en la BD", descripcio: err });
-        }
-        if (results.length > 0) {
-            return res.json(results[0]);
-        }
-        else {
-            return res.status(404).json({error: "Camión no encontrado"});
-        }
+    db.query("SELECT * FROM trucks WHERE id = ?", [id], (err, rows) => {
+        if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+        if (rows.length > 0) return res.json(rows);
+        return res.status(404).json({ error: "Camíó no trobat" });
     });
-})
+});
 
-
-// POST
 app.post("/trucks", (req, res) => {
     const { license_plate, model, driver_name } = req.body;
-
-    db.query(
-        "INSERT INTO trucks (license_plate, model, driver_name) VALUES (?, ?, ?)",
-        [license_plate, model, driver_name],
-        (err, result) => {
-            if (err) return res.status(500).json(err);
-            res.json({ id: result.insertId });
-        }
-    );
-});
-
-// DELETE
-app.delete("/trucks/:id", (req, res) => {
-    db.query("DELETE FROM trucks WHERE idCamion=?", [req.params.id], (err) => {
-        if (err) return res.status(500).json(err);
-        res.json({ message: "Camió eliminat" });
+    const sql = "INSERT INTO trucks (license_plate, model, driver_name) VALUES (?, ?, ?)";
+    
+    db.query(sql, [license_plate, model, driver_name], (err, result) => {
+        if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+        return res.json({ message: "Camió creat", id: result.insertId });
     });
 });
 
-//PUT
 app.put("/trucks/:id", (req, res) => {
+    const id = parseInt(req.params.id);
     const { license_plate, model, driver_name } = req.body;
-    db.query(
-        "UPDATE trucks SET license_plate=?, model=?, driver_name=? WHERE idCamion=?",
-        [license_plate, model, driver_name, req.params.id],
-        (err, result) => {
-            if (err) return res.status(500).json(err);
-            res.json({ message: "Camió actualitzat" });
-        }
-    );
-});
-
-//Routes
-// GET routes
-app.get("/routes", (req, res) => {
-    db.query("SELECT * FROM routes", (err, results) => {
-        if (err) return res.status(500).json(err);
-        res.json(results);
+    
+    const sql = "UPDATE trucks SET license_plate = ?, model = ?, driver_name = ? WHERE idCamion = ?";
+    db.query(sql, [license_plate, model, driver_name, id], (err, result) => {
+        if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+        return res.json({ message: "Camió actualitzat" });
     });
 });
 
-// POST routes
-app.post("/routes", (req, res) => {
-    const {start_location, end_location, distance_km, fuel_consumed_liters} = req.body;
-
-    db.query(
-        `INSERT INTO routes 
-        (start_location, end_location, distance_km, fuel_consumed_liters)
-        VALUES (?, ?, ?, ?,)`,
-        [start_location, end_location, distance_km, fuel_consumed_liters],
-        (err, result) => {
-            if (err) return res.status(500).json(err);
-            res.json({ id: result.insertId });
-        }
-    );  
-});
-
-// DELETE routes
-app.delete("/routes/:id", (req, res) => {
-    db.query("DELETE FROM routes WHERE id=?", [req.params.id], (err) => {
-        if (err) return res.status(500).json(err);
-        res.json({ message: "Ruta eliminada" });
+app.delete("/trucks/:id", (req, res) => {
+    const id = parseInt(req.params.id);
+    db.query("DELETE FROM trucks WHERE idCamion = ?", [id], (err, result) => {
+        if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+        if (result.affectedRows === 0) return res.status(404).json({ error: "Camió no trobat" });
+        return res.json({ message: "Camió eliminat" });
     });
 });
 
-//PUT routes
-app.put("/routes/:id", (req, res) => {
-    const {start_location, end_location, distance_km, fuel_consumed_liters } = req.body;
+//RUTES
 
-    db.query(
-        `UPDATE routes SET start_location=?, end_location=?, distance_km=?, fuel_consumed_liters=? WHERE id=?`,
-        [ start_location, end_location, distance_km, fuel_consumed_liters, req.params.id],
-        (err, result) => {
-            if (err) return res.status(500).json(err);
-            res.json({ message: "Ruta actualitzada" });
-        }
-    );
+app.get("/route", (req, res) => {
+    db.query("SELECT * FROM route", (err, rows) => {
+        if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+        return res.json(rows);
+    });
 });
 
-//Fuel
-// GET fuel
+app.post("/route", (req, res) => {
+    const { start_location, end_location, distance_km, fuel_consumed_liters } = req.body;
+    const sql = "INSERT INTO route (start_location, end_location, distance_km, fuel_consumed_liters) VALUES (?, ?, ?, ?)";
+    
+    db.query(sql, [start_location, end_location, distance_km, fuel_consumed_liters], (err, result) => {
+        if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+        return res.json({ message: "Ruta creada", id: result.insertId });
+    });
+});
+
+app.put("/route/:id", (req, res) => {
+    const id = parseInt(req.params.id);
+    const { start_location, end_location, distance_km, fuel_consumed_liters } = req.body;
+    const sql = "UPDATE route SET start_location = ?, end_location = ?, distance_km = ?, fuel_consumed_liters = ? WHERE id = ?";
+    
+    db.query(sql, [start_location, end_location, distance_km, fuel_consumed_liters, id], (err, result) => {
+        if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+        return res.json({ message: "Ruta actualitzada" });
+    });
+});
+
+app.delete("/route/:id", (req, res) => {
+    const id = parseInt(req.params.id);
+    db.query("DELETE FROM route WHERE id = ?", [id], (err, result) => {
+        if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+        return res.json({ message: "Ruta eliminada" });
+    });
+});
+
+//COMBUSTIBLE
+
 app.get("/fuel", (req, res) => {
-    db.query("SELECT * FROM fuel_invoices", (err, results) => {
-        if (err) return res.status(500).json(err);
-        res.json(results);
+    db.query("SELECT * FROM fuel_invoices", (err, rows) => {
+        if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+        return res.json(rows);
     });
 });
 
-// POST fuel
 app.post("/fuel", (req, res) => {
     const { truck_id, date, fuel_type, liters, price_per_liter, total_price } = req.body;
-
-    db.query(
-        `INSERT INTO fuel_invoices 
-        (truck_id, date, fuel_type, liters, price_per_liter, total_price)
-        VALUES (?, ?, ?, ?, ?, ?)`,
-        [truck_id, date, fuel_type, liters, price_per_liter, total_price],
-        (err, result) => {
-            if (err) return res.status(500).json(err);
-            res.json({ id: result.insertId });
-        }
-    );
+    const sql = "INSERT INTO fuel_invoices (truck_id, date, fuel_type, liters, price_per_liter, total_price) VALUES (?, ?, ?, ?, ?, ?)";
+    
+    db.query(sql, [truck_id, date, fuel_type, liters, price_per_liter, total_price], (err, result) => {
+        if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+        return res.json({ message: "Factura creada", id: result.insertId });
+    });
 });
 
-// DELETE fuel
 app.delete("/fuel/:id", (req, res) => {
-    db.query("DELETE FROM fuel_invoices WHERE id=?", [req.params.id], (err) => {
-        if (err) return res.status(500).json(err);
-        res.json({ message: "Eliminat" });
+    const id = parseInt(req.params.id);
+    db.query("DELETE FROM fuel_invoices WHERE id = ?", [id], (err, result) => {
+        if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+        return res.json({ message: "Eliminat" });
     });
 });
 
-//Mantenimento
-// GET maintenance
+//MANTENIMENT
+
 app.get("/maintenance", (req, res) => {
-    db.query("SELECT * FROM maintenance_invoices", (err, results) => {
-        if (err) return res.status(500).json(err);
-        res.json(results);
+    db.query("SELECT * FROM maintenance_invoices", (err, rows) => {
+        if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+        return res.json(rows);
     });
 });
 
-// POST maintenance
 app.post("/maintenance", (req, res) => {
     const { truck_id, date, description, cost } = req.body;
-
-    db.query(
-        "INSERT INTO maintenance_invoices (truck_id, date, description, cost) VALUES (?, ?, ?, ?)",
-        [truck_id, date, description, cost],
-        (err, result) => {
-            if (err) return res.status(500).json(err);
-            res.json({ id: result.insertId });
-        }
-    );
-});
-
-// DELETE maintenance
-app.delete("/maintenance/:id", (req, res) => {
-    db.query("DELETE FROM maintenance_invoices WHERE id=?", [req.params.id], (err) => {
-        if (err) return res.status(500).json(err);
-        res.json({ message: "Eliminat" });
+    const sql = "INSERT INTO maintenance_invoices (truck_id, date, description, cost) VALUES (?, ?, ?, ?)";
+    
+    db.query(sql, [truck_id, date, description, cost], (err, result) => {
+        if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+        return res.json({ message: "Manteniment creat", id: result.insertId });
     });
 });
-//ROOT
-app.get("/", (req, res) => {
-    res.send("Benvinguts a BitMags");
+
+app.delete("/maintenance/:id", (req, res) => {
+    const id = parseInt(req.params.id);
+    db.query("DELETE FROM maintenance_invoices WHERE id = ?", [id], (err, result) => {
+        if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+        return res.json({ message: "Eliminat" });
+    });
 });
 
+// ROOT
+app.get("/", (req, res) => {
+    res.send("Benvinguts a BitMags (Estil SQLite amb MySQL)");
+});
+
+// Obrim el servidor
 app.listen(PORT, () => {
-    console.log(`Servidor en http://localhost:${PORT}`);
+    console.log(`Example app listening http://localhost:${PORT}`);
 });
