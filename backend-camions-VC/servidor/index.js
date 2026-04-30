@@ -167,13 +167,13 @@ app.post("/routes", (req, res) => {
     db.query(
         `INSERT INTO routes 
         (start_location, end_location, distance_km, fuel_consumed_liters)
-        VALUES (?, ?, ?, ?, ?, ?)`,
+        VALUES (?, ?, ?, ?,)`,
         [start_location, end_location, distance_km, fuel_consumed_liters],
         (err, result) => {
             if (err) return res.status(500).json(err);
             res.json({ id: result.insertId });
         }
-    );
+    );  
 });
 
 // DELETE routes
