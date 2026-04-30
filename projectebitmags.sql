@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 30-04-2026 a las 15:09:09
+-- Tiempo de generación: 30-04-2026 a las 15:23:19
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -32,8 +32,19 @@ CREATE TABLE `date_time` (
   `truck_id` int(11) NOT NULL,
   `start_time` time NOT NULL,
   `end_time` time DEFAULT NULL,
-  `date` date DEFAULT NULL
+  `date` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `date_time`
+--
+
+INSERT INTO `date_time` (`route_id`, `truck_id`, `start_time`, `end_time`, `date`) VALUES
+(1, 1, '08:00:00', '10:30:00', '2026-04-30'),
+(2, 2, '09:15:00', '11:45:00', '2026-04-30'),
+(3, 3, '13:00:00', '15:30:00', '2026-04-30'),
+(4, 4, '14:00:00', '16:00:00', '2026-04-30'),
+(5, 5, '17:00:00', '19:30:00', '2026-04-30');
 
 -- --------------------------------------------------------
 
