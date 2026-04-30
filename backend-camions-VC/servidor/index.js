@@ -138,6 +138,7 @@ app.delete("/users/:id", (req, res) => {
 
 //CAMIONS
 
+// GET
 app.get("/trucks", (req, res) => {
     db.query("SELECT * FROM trucks", (err, rows) => {
         if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
@@ -145,17 +146,21 @@ app.get("/trucks", (req, res) => {
     });
 });
 
+// GET
 app.get("/trucks/:id", (req, res) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) return res.status(400).json({ error: "ID invàlid" });
 
     db.query("SELECT * FROM trucks WHERE id = ?", [id], (err, rows) => {
         if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
-        if (rows.length > 0) return res.json(rows);
+        if (rows && rows.length > 0) {
+            return res.json(rows); // Devolvemos el objeto, no el array
+        }
         return res.status(404).json({ error: "Camíó no trobat" });
     });
 });
 
+// POST
 app.post("/trucks", (req, res) => {
     const { license_plate, model, driver_name } = req.body;
     const sql = "INSERT INTO trucks (license_plate, model, driver_name) VALUES (?, ?, ?)";
@@ -166,22 +171,28 @@ app.post("/trucks", (req, res) => {
     });
 });
 
+// PUT
 app.put("/trucks/:id", (req, res) => {
     const id = parseInt(req.params.id);
     const { license_plate, model, driver_name } = req.body;
     
-    const sql = "UPDATE trucks SET license_plate = ?, model = ?, driver_name = ? WHERE idCamion = ?";
+    const sql = "UPDATE trucks SET license_plate = ?, model = ?, driver_name = ? WHERE id = ?";
+    
     db.query(sql, [license_plate, model, driver_name, id], (err, result) => {
         if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+        if (result.affectedRows === 0) return res.status(404).json({ error: "Camíó no trobat" });
         return res.json({ message: "Camió actualitzat" });
     });
 });
 
+// DELETE
 app.delete("/trucks/:id", (req, res) => {
     const id = parseInt(req.params.id);
-    db.query("DELETE FROM trucks WHERE idCamion = ?", [id], (err, result) => {
+    if (isNaN(id)) return res.status(400).json({ error: "ID invàlid" });
+
+    db.query("DELETE FROM trucks WHERE id = ?", [id], (err, result) => {
         if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
-        if (result.affectedRows === 0) return res.status(404).json({ error: "Camió no trobat" });
+        if (result.affectedRows === 0) return res.status(404).json({ error: "Camíó no trobat" });
         return res.json({ message: "Camió eliminat" });
     });
 });
