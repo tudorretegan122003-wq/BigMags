@@ -186,11 +186,11 @@ app.delete("/routes/:id", (req, res) => {
 
 //PUT routes
 app.put("/routes/:id", (req, res) => {
-    const { truck_id, start_location, end_location, distance_km, fuel_consumed_liters, date } = req.body;
+    const {start_location, end_location, distance_km, fuel_consumed_liters } = req.body;
 
     db.query(
-        `UPDATE routes SET truck_id=?, start_location=?, end_location=?, distance_km=?, fuel_consumed_liters=?, date=? WHERE id=?`,
-        [truck_id, start_location, end_location, distance_km, fuel_consumed_liters, date, req.params.id],
+        `UPDATE routes SET start_location=?, end_location=?, distance_km=?, fuel_consumed_liters=? WHERE id=?`,
+        [ start_location, end_location, distance_km, fuel_consumed_liters, req.params.id],
         (err, result) => {
             if (err) return res.status(500).json(err);
             res.json({ message: "Ruta actualitzada" });
