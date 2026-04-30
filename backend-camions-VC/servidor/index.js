@@ -282,6 +282,80 @@ app.delete("/maintenance/:id", (req, res) => {
     });
 });
 
+//DATE_TIME
+
+app.get("/date-times", (req, res) => {
+    db.query("SELECT * FROM `date_time`", (err, rows) => {
+        if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+        return res.json(rows);
+    });
+});
+
+// GET
+app.get("/date-times/:id", (req, res) => {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ error: "ID inválido" });
+
+    db.query("SELECT * FROM `date_time` WHERE id = ?", [id], (err, rows) => {
+        if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+        if (rows && rows.length > 0) {
+            return res.json(rows);
+        } else {
+            return res.status(404).json({ error: "Registre no trobat" });
+        }
+    });
+});
+
+// POST
+app.post("/date-times", (req, res) => {
+    const { user_id, start_datetime, end_datetime, description } = req.body;
+
+    if (!user_id || !start_datetime || !end_datetime) {
+        return res.json({ error: "Falten dades (user_id, start_datetime, end_datetime)" });
+    }
+
+    const sql = "INSERT INTO `date_time` (user_id, start_datetime, end_datetime, description) VALUES (?, ?, ?, ?)";
+    const params = [user_id, start_datetime, end_datetime, description || ""];
+
+    db.query(sql, params, (err, result) => {
+        if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+        return res.json({ message: "Registre de data/hora creat", id: result.insertId });
+    });
+});
+
+// PUT
+app.put("/date-times/:id", (req, res) => {
+    const id = parseInt(req.params.id);
+    const { user_id, start_datetime, end_datetime, description } = req.body;
+
+    db.query("SELECT * FROM `date_time` WHERE id = ?", [id], (err, rows) => {
+        if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+        if (!rows || rows.length === 0) {
+            return res.status(404).json({ error: "Registre no trobat" });
+        }
+
+        const sql = "UPDATE `date_time` SET user_id = ?, start_datetime = ?, end_datetime = ?, description = ? WHERE id = ?";
+        db.query(sql, [user_id, start_datetime, end_datetime, description || "", id], (err, result) => {
+            if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+            return res.json({ message: "Registre actualitzat" });
+        });
+    });
+});
+
+// DELETE
+app.delete("/date-times/:id", (req, res) => {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ error: "ID inválido" });
+
+    db.query("DELETE FROM `date_time` WHERE id = ?", [id], (err, result) => {
+        if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "Id no existeix" });
+        }
+        return res.json({ message: "Registre eliminat" });
+    });
+});
+
 // ROOT
 app.get("/", (req, res) => {
     res.send("Benvinguts a BitMags");
