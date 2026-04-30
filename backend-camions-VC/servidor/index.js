@@ -64,8 +64,8 @@ app.post("/users", (req, res) => {
         return res.json({ error: "Falten dades (username o email)" });
     }
 
-    const sql = "INSERT INTO users (username, email, role) VALUES (?, ?, ?)";
-    const params = [dadesUsuari.username, dadesUsuari.email, dadesUsuari.role || "user"];
+    const sql = "INSERT INTO users (username, email) VALUES (?, ?, ?)";
+    const params = [dadesUsuari.username, dadesUsuari.email || "user"];
 
     db.query(sql, params, (err, result) => {
         if (err) {
@@ -76,11 +76,11 @@ app.post("/users", (req, res) => {
     });
 });
 
-function provaEnviarPost(username, email, role) {
+function provaEnviarPost(username, email) {
     fetch("http://localhost:3000/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: username, email: email, role: role })
+        body: JSON.stringify({ username: username, email: email })
     }).then((resposta) => {
         if (!resposta.ok) {
             throw new Error("Error resposta servidor: " + resposta.statusText);
@@ -106,8 +106,8 @@ app.put("/users/:id", (req, res) => {
             return res.status(404).json({ error: "Usuari no trobat" });
         }
 
-        const sql = "UPDATE users SET username = ?, email = ?, role = ? WHERE idUsuari = ?";
-        db.query(sql, [dades.username, dades.email, dades.role, idUsuari], (err, result) => {
+        const sql = "UPDATE users SET username = ?, email = ? WHERE idUsuari = ?";
+        db.query(sql, [dades.username, dades.email, idUsuari], (err, result) => {
             if (err) {
                 return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
             } else {

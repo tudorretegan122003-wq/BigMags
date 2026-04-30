@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 30-04-2026 a las 15:23:19
+-- Tiempo de generación: 30-04-2026 a las 15:58:59
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -161,7 +161,6 @@ CREATE TABLE `users` (
   `username` varchar(50) NOT NULL,
   `password` varchar(255) NOT NULL,
   `email` varchar(100) NOT NULL,
-  `role` enum('admin','user') NOT NULL DEFAULT 'user',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish2_ci;
 
@@ -169,12 +168,12 @@ CREATE TABLE `users` (
 -- Volcado de datos para la tabla `users`
 --
 
-INSERT INTO `users` (`idUsuari`, `username`, `password`, `email`, `role`, `created_at`) VALUES
-(1, 'usuario1', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'usuario1@ejemplo.com', 'user', '2026-04-22 14:09:18'),
-(2, 'usuario2', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'usuario2@ejemplo.com', 'user', '2026-04-22 14:09:18'),
-(3, 'admin_user', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@ejemplo.com', 'admin', '2026-04-22 14:09:18'),
-(4, 'usuario4', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'usuario4@ejemplo.com', 'user', '2026-04-22 14:09:18'),
-(5, 'usuario5', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'usuario5@ejemplo.com', 'user', '2026-04-22 14:09:18');
+INSERT INTO `users` (`idUsuari`, `username`, `password`, `email`, `created_at`) VALUES
+(1, 'usuario1', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'usuario1@ejemplo.com', '2026-04-22 14:09:18'),
+(2, 'usuario2', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'usuario2@ejemplo.com', '2026-04-22 14:09:18'),
+(3, 'admin_user', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@ejemplo.com', '2026-04-22 14:09:18'),
+(4, 'usuario4', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'usuario4@ejemplo.com', '2026-04-22 14:09:18'),
+(5, 'usuario5', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'usuario5@ejemplo.com', '2026-04-22 14:09:18');
 
 --
 -- Índices para tablas volcadas
