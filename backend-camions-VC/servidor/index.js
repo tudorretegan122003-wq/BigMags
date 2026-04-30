@@ -154,7 +154,7 @@ app.get("/trucks/:id", (req, res) => {
     db.query("SELECT * FROM trucks WHERE id = ?", [id], (err, rows) => {
         if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
         if (rows && rows.length > 0) {
-            return res.json(rows); // Devolvemos el objeto, no el array
+            return res.json(rows);
         }
         return res.status(404).json({ error: "Camíó no trobat" });
     });
