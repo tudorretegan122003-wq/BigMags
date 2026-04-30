@@ -190,41 +190,45 @@ app.delete("/trucks/:id", (req, res) => {
 
 //RUTES
 
-app.get("/route", (req, res) => {
+app.get("/routes", (req, res) => {
     db.query("SELECT * FROM route", (err, rows) => {
         if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
         return res.json(rows);
     });
 });
 
-app.post("/route", (req, res) => {
-    const { start_location, end_location, distance_km, fuel_consumed_liters } = req.body;
-    const sql = "INSERT INTO route (start_location, end_location, distance_km, fuel_consumed_liters) VALUES (?, ?, ?, ?)";
+app.post("/routes", (req, res) => {
+    const { start_location, end_location, distance_km } = req.body;
+
+    const sql = "INSERT INTO route (start_location, end_location, distance_km) VALUES (?, ?, ?)";
     
-    db.query(sql, [start_location, end_location, distance_km, fuel_consumed_liters], (err, result) => {
+    db.query(sql, [start_location, end_location, distance_km], (err, result) => {
         if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
         return res.json({ message: "Ruta creada", id: result.insertId });
     });
 });
 
-app.put("/route/:id", (req, res) => {
+app.put("/routes/:id", (req, res) => {
     const id = parseInt(req.params.id);
-    const { start_location, end_location, distance_km, fuel_consumed_liters } = req.body;
-    const sql = "UPDATE route SET start_location = ?, end_location = ?, distance_km = ?, fuel_consumed_liters = ? WHERE id = ?";
+    const { start_location, end_location, distance_km } = req.body;
+
+    const sql = "UPDATE route SET start_location = ?, end_location = ?, distance_km = ? WHERE id = ?";
     
-    db.query(sql, [start_location, end_location, distance_km, fuel_consumed_liters, id], (err, result) => {
+    db.query(sql, [start_location, end_location, distance_km, id], (err, result) => {
         if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
         return res.json({ message: "Ruta actualitzada" });
     });
 });
 
-app.delete("/route/:id", (req, res) => {
+app.delete("/routes/:id", (req, res) => {
     const id = parseInt(req.params.id);
     db.query("DELETE FROM route WHERE id = ?", [id], (err, result) => {
         if (err) return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
+        if (result.affectedRows === 0) return res.status(404).json({ error: "Ruta no trobat" });
         return res.json({ message: "Ruta eliminada" });
     });
 });
+
 
 //COMBUSTIBLE
 
