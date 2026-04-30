@@ -162,13 +162,13 @@ app.get("/routes", (req, res) => {
 
 // POST routes
 app.post("/routes", (req, res) => {
-    const { truck_id, start_location, end_location, distance_km, fuel_consumed_liters, date } = req.body;
+    const {start_location, end_location, distance_km, fuel_consumed_liters} = req.body;
 
     db.query(
         `INSERT INTO routes 
-        (truck_id, start_location, end_location, distance_km, fuel_consumed_liters, date)
+        (start_location, end_location, distance_km, fuel_consumed_liters)
         VALUES (?, ?, ?, ?, ?, ?)`,
-        [truck_id, start_location, end_location, distance_km, fuel_consumed_liters, date],
+        [start_location, end_location, distance_km, fuel_consumed_liters],
         (err, result) => {
             if (err) return res.status(500).json(err);
             res.json({ id: result.insertId });
