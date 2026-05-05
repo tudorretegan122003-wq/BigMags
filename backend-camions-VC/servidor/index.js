@@ -292,6 +292,24 @@ app.delete("/maintenance/:id", (req, res) => {
         return res.json({ message: "Eliminat" });
     });
 });
+// PUT
+app.put("/maintenance-invoices/:id", (req, res) => {
+    const id = parseInt(req.params.id);
+    const { truck_id, date, description, cost } = req.body;
+
+    db.query("SELECT * FROM `maintenance_invoices` WHERE id = ?", [id], (err, rows) => {
+        if (err) return res.status(500).json({ error: "Error en la BD", descripció: err.message });
+        if (!rows || rows.length === 0) {
+            return res.status(404).json({ error: "Registre no trobat" });
+        }
+        const sql = "UPDATE `maintenance_invoices` SET truck_id = ?, date = ?, description = ?, cost = ? WHERE id = ?";
+        
+        db.query(sql, [truck_id, date, description || null, cost, id], (err, result) => {
+            if (err) return res.status(500).json({ error: "Error en la BD", descripció: err.message });
+            return res.json({ message: "Registre actualitzat" });
+        });
+    });
+});
 
 //DATE_TIME
 
