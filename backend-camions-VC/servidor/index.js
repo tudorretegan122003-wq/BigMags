@@ -293,7 +293,7 @@ app.delete("/maintenance/:id", (req, res) => {
     });
 });
 // PUT
-app.put("/maintenance-invoices/:id", (req, res) => {
+app.put("/maintenance/:id", (req, res) => {
     const id = parseInt(req.params.id);
     const { truck_id, date, description, cost } = req.body;
 
