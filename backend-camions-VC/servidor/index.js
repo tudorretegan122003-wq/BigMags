@@ -49,7 +49,7 @@ app.get("/users/:id", (req, res) => {
             return res.status(500).json({ error: "Error en la BD", descripcio: err.message });
         }
         if (rows && rows.length > 0) {
-            console.log(rows);
+            console.log(rows); 
             return res.json(rows);
         } else {
             return res.status(404).json({ error: "Usuari no trobat" });
@@ -391,6 +391,7 @@ app.get("/", (req, res) => {
 });
 
 // Obrim el servidor
-app.listen(PORT, () => {
-    console.log(`Example app listening http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Servidor en execució a http://0.0.0.0:${PORT}`);
+    console.log(`Connecta amb la IP local: (ex: http://192.168.1.XX:${PORT})`);
 });
